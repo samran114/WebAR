@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ป้ายประชาสัมพันธ์มีชีวิต - สำนักงานที่ดิน</title>
+  
+  <!-- A-Frame library -->
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+  <!-- MindAR library for Image Tracking -->
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+
+  <style>
+    /* ปุ่มกดเมนูเพิ่มเติม Overlay บนหน้าจอ */
+    #ui-overlay {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 999;
+      display: none; /* แสดงเมื่อส่องพบ Marker */
+    }
+    .btn-action {
+      background-color: #008c44;
+      color: white;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 25px;
+      font-size: 16px;
+      font-weight: bold;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- UI Button ที่จะปรากฏขึ้นมาเมื่อกล้องจับภาพแบนเนอร์ได้ -->
+  <div id="ui-overlay">
+    <button class="btn-action" onclick="alert('เอกสารที่ต้องใช้:\n1. โฉนดที่ดิน (ฉบับจริง)\n2. บัตรประชาชน\n3. ทะเบียนบ้าน')">
+      📄 รายการเอกสารที่ต้องใช้
+    </button>
+  </div>
+
+  <!-- ตั้งค่าระบบ AR ส่องจับไฟล์ .mind (รูปเป้าหมายแบนเนอร์) -->
+  <a-scene 
+    mindar-image="imageTargetSrc: ./banner-target.mind;" 
+    color-space="sRGB" 
+    renderer="colorManagement: true, physicallyCorrectLights" 
+    vr-mode-ui="enabled: false" 
+    device-orientation-permission-ui="enabled: false">
+
+    <a-assets>
+      <!-- ไฟล์วิดีโอน้องขวัญดินอธิบาย 4 ขั้นตอน (รองรับวิดีโอที่มีเสียง) -->
+      <video id="mascotVideo" src="./nong_khwandin_intro.mp4" preload="auto" loop crossorigin="anonymous" playsinline webkit-playsinline></video>
+    </a-assets>
+
+    <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+    <!-- กำหนด Target ลำดับที่ 0 (แบนเนอร์โอนกรรมสิทธิ์) -->
+    <a-entity mindar-image-target="targetIndex: 0" id="bannerTarget">
+      <!-- แสดงวิดีโอน้องขวัญดินซ้อนบนแบนเนอร์เมื่อส่องเจอ -->
+      <a-video 
+        src="#mascotVideo" 
+        position="0 0 0.1" 
+        width="1" 
+        height="1.5" 
+        rotation="0 0 0">
+      </a-video>
+    </a-entity>
+
+  </a-scene>
+
+  <script>
+    const bannerTarget = document.querySelector('#bannerTarget');
+    const mascotVideo = document.querySelector('#mascotVideo');
+    const uiOverlay = document.querySelector('#ui-overlay');
+
+    // เมื่อกล้องส่องเจอแบนเนอร์
+    bannerTarget.addEventListener("targetFound", () => {
+      mascotVideo.play();
+      uiOverlay.style.display = "block";
+    });
+
+    // เมื่อเบือนกล้องออกจากแบนเนอร์
+    bannerTarget.addEventListener("targetLost", () => {
+      mascotVideo.pause();
+      uiOverlay.style.display = "none";
+    });
+  </script>
+</body>
+</html>
